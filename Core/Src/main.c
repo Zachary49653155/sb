@@ -1,0 +1,696 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "dma.h"
+#include "tim.h"
+#include "usart.h"
+#include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "stdio.h"
+#include "math.h"
+#include "printf.h"
+#include "duoji.h"
+#include "count_theta.h"
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+uint16_t quare[19]= {150,150,150,150,150,150,100,
+                         150,150,150,150,150,100,
+                         150,150,150,150,150,100};
+//quare1-6代表需要转到的位置
+//quare7-12表示上次所在的位置
+//quare13-18表示电机瞬时所在位置
+uint16_t jiaodu = 0;
+
+uint8_t RxFlag=0;
+uint8_t RxBuffer[20];
+
+#define LENGTH 100
+uint8_t USART1_RxBuffer[LENGTH];
+uint8_t RecCount = 0;
+uint8_t Usart_RxFlag = 0;
+uint8_t delay_time = 0;
+
+double theta1,theta2,theta3,theta4;
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+    /* USER CODE BEGIN 1 */
+
+    /* USER CODE END 1 */
+
+    /* MCU Configuration--------------------------------------------------------*/
+
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
+
+    /* USER CODE BEGIN Init */
+
+    /* USER CODE END Init */
+
+    /* Configure the system clock */
+    SystemClock_Config();
+
+    /* USER CODE BEGIN SysInit */
+
+    /* USER CODE END SysInit */
+
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_DMA_Init();
+    MX_TIM3_Init();
+    MX_USART1_UART_Init();
+    /* USER CODE BEGIN 2 */
+    HAL_TIM_Base_Init(&htim3);
+    __HAL_TIM_CLEAR_IT(&htim3, TIM_IT_UPDATE);
+    HAL_TIM_Base_Start_IT(&htim3);
+
+
+//    HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuffer, 5 );
+
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    HAL_UART_Receive_DMA (&huart1, (uint8_t*)USART1_RxBuffer, LENGTH);
+
+
+
+    /* USER CODE END 2 */
+
+    /* Infinite loop */
+    /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+        /* USER CODE END WHILE */
+
+        /* USER CODE BEGIN 3 */
+        HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_9);
+        HAL_Delay(100);
+        /*任务2
+                //计算需要转到的位置
+                if(RxBuffer[2]=='0')//第三位表示符号，0是正
+                {
+                    jiaodu=((uint8_t)RxBuffer[3]-48)*10+((uint8_t)RxBuffer[4]-48);
+                    quare[1]=150+jiaodu*50/45;
+                }
+                else if(RxBuffer[2]=='1')//1表示负
+                {
+                    jiaodu=((uint8_t)RxBuffer[3]-48)*10+((uint8_t)RxBuffer[4]-48);
+                    quare[1]=150-jiaodu*50/45;
+                }//quare1代表需要转到的位置，quare2表示上次所在的位置
+
+
+                if(RxBuffer[0]=='0')//接受第一位是0，进入控制
+                {
+                    if(quare[1] > quare[2])
+                    {
+                        if(RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                        {
+                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(25);
+                        }
+                        if(RxBuffer[1]=='2')
+                        {
+                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(50);
+                        }
+                        if(RxBuffer[1]=='3')
+                        {
+                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(100);
+                        }
+                    }
+                    else if(quare[1] < quare[2])
+                    {
+                        if(RxBuffer[1]=='1')
+                        {
+                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(25);
+                        }
+                        if(RxBuffer[1]=='2')
+                        {
+                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(50);
+                        }
+                        if(RxBuffer[1]=='3')
+                        {
+                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(100);
+                        }
+                    }
+                }
+                quare[2]=quare[1];
+        */
+
+
+        /*任务3
+        if(Usart_RxFlag == 1 )  //数据接收完成
+        {
+            Usart_RxFlag = 0;
+            if (USART1_RxBuffer[0] == '0')   //如果第一个数据是字符0
+            {
+                //计算需要转到的位置
+        					  //第一个舵机
+                if(USART1_RxBuffer[2]=='0')//第3位表示符号，0是正
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[3]-48)*10+((uint8_t)USART1_RxBuffer[4]-48);
+                    quare[1]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[2]=='1')//1表示负
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[3]-48)*10+((uint8_t)USART1_RxBuffer[4]-48);
+                    quare[1]=150-jiaodu*50/45;
+                }
+        						//quare1-6代表需要转到的位置，quare7-12表示上次所在的位置
+        						//quare13-18表示电机瞬时所在位置
+        						//第二个舵机
+                if(USART1_RxBuffer[5]=='0')//第6位表示符号
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[6]-48)*10+((uint8_t)USART1_RxBuffer[7]-48);
+                    quare[2]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[5]=='1')
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[6]-48)*10+((uint8_t)USART1_RxBuffer[7]-48);
+                    quare[2]=150-jiaodu*50/45;
+                }
+        						//第三个舵机
+                if(USART1_RxBuffer[8]=='0')//第9位表示符号
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[9]-48)*10+((uint8_t)USART1_RxBuffer[10]-48);
+                    quare[3]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[8]=='1')
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[9]-48)*10+((uint8_t)USART1_RxBuffer[10]-48);
+                    quare[3]=150-jiaodu*50/45;
+                }
+        						//第四个舵机
+                if(USART1_RxBuffer[11]=='0')//第12位表示符号
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[12]-48)*10+((uint8_t)USART1_RxBuffer[13]-48);
+                    quare[4]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[11]=='1')
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[12]-48)*10+((uint8_t)USART1_RxBuffer[13]-48);
+                    quare[4]=150-jiaodu*50/45;
+                }
+        						//第五个舵机
+                if(USART1_RxBuffer[14]=='0')//第15位表示符号
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[15]-48)*10+((uint8_t)USART1_RxBuffer[16]-48);
+                    quare[5]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[14]=='1')
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[15]-48)*10+((uint8_t)USART1_RxBuffer[16]-48);
+                    quare[5]=150-jiaodu*50/45;
+                }
+        						//第六个舵机
+                if(USART1_RxBuffer[17]=='0')//第18位表示符号
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[18]-48)*10+((uint8_t)USART1_RxBuffer[19]-48);
+                    quare[6]=150+jiaodu*50/45;
+                }
+                else if(USART1_RxBuffer[17]=='1')
+                {
+                    jiaodu=((uint8_t)USART1_RxBuffer[18]-48)*10+((uint8_t)USART1_RxBuffer[19]-48);
+                    quare[6]=150-jiaodu*50/45;
+                }
+        				}
+
+
+
+        				//第一个舵机运动
+            if(quare[1] > quare[7])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(50);
+                }
+                quare[7]=quare[1];
+            }
+            else if(quare[1] < quare[7])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(50);
+                }
+                quare[7]=quare[1];
+            }
+
+        				//第二个舵机运动
+        				if(quare[2] > quare[8])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(50);
+                }
+                quare[8]=quare[2];
+            }
+            else if(quare[2] < quare[8])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(50);
+                }
+                quare[8]=quare[2];
+            }
+
+        	    	//第三个舵机运动
+        				if(quare[3] > quare[9])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(50);
+                }
+                quare[9]=quare[3];
+            }
+            else if(quare[3] < quare[9])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(50);
+                }
+                quare[9]=quare[3];
+            }
+        			  //第四个舵机运动
+        				if(quare[4] > quare[10])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(50);
+                }
+                quare[10]=quare[4];
+            }
+            else if(quare[4] < quare[10])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(50);
+                }
+                quare[10]=quare[4];
+            }
+        				//第五个舵机运动
+        				if(quare[5] > quare[11])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(50);
+                }
+                quare[11]=quare[5];
+            }
+            else if(quare[5] < quare[11])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(50);
+                }
+                quare[11]=quare[5];
+            }
+        		    //第六个舵机运动
+        				if(quare[6] > quare[12])
+            {
+                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
+                {
+                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(50);
+                }
+                quare[12]=quare[6];
+            }
+            else if(quare[6] < quare[12])
+            {
+                if(USART1_RxBuffer[1]=='1')
+                {
+                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(15);
+                }
+                if(USART1_RxBuffer[1]=='2')
+                {
+                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(30);
+                }
+                if(USART1_RxBuffer[1]=='3')
+                {
+                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(50);
+                }
+                quare[12]=quare[6];
+            }
+        		}*/
+        /*任务4*/
+        if(Usart_RxFlag == 1 )  //数据接收完成
+        {
+            if (USART1_RxBuffer[0] == '7')//7是标识符，说明进入夹取控制
+            {
+                //计算出x0和y0
+							  thetacount(theta1,theta2,theta3,theta4);
+
+                quare[1]=150+theta4*50/45;
+                quare[2]=150+theta1*50/45;
+                quare[3]=150+theta2*50/45;
+                quare[4]=150+theta3*50/45;
+                quare[5]=150;
+                quare[6]=150+32*50/45;
+								control_duoji(4);
+                control_duoji(3);
+                control_duoji(1);
+                control_duoji(2);
+                control_duoji(6);
+                HAL_Delay(1500);
+
+                //拿起飞镖
+                quare[2]=150+(theta1+45)*50/45;
+                control_duoji(2);
+                Usart_RxFlag = 0;//重置串口接收标志
+            }
+
+
+
+            if (USART1_RxBuffer[0] == '8')//8是标识符，说明进入放置控制
+            {
+                thetacount(theta1,theta2,theta3,theta4);
+
+                quare[1]=150+theta4*50/45;
+                quare[2]=150+theta1*50/45;
+                quare[3]=150+theta2*50/45;
+                quare[4]=150+theta3*50/45;
+                quare[5]=150;
+								
+                control_duoji(4);
+                control_duoji(3);
+                control_duoji(1);
+                control_duoji(2);
+								
+								HAL_Delay(1500);
+								//放下飞镖
+								quare[6]=150-20*50/45;
+                control_duoji(6);
+								//提起机械臂
+                quare[2]=150+(theta1+45)*50/45;
+								control_duoji(2);
+                Usart_RxFlag = 0;//重置串口接收标志
+            }
+
+        }
+    }
+    /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    /** Initializes the RCC Oscillators according to the specified parameters
+    * in the RCC_OscInitTypeDef structure.
+    */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /** Initializes the CPU, AHB and APB buses clocks
+    */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                  |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+/* USER CODE BEGIN 4 */
+//           HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);  //合正PB8，第六个舵机
+//           HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);  //顺负PB5
+//           HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);//里正PD2
+//           HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,GPIO_PIN_SET);//里负PC12
+//           HAL_GPIO_WritePin(GPIOC,GPIO_PIN_11,GPIO_PIN_SET);//里正PC11
+//           HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_SET);//顺负PC10，第一个舵机
+int count=0;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)//定时器中断回调函数
+{
+    if(htim->Instance == TIM3)
+    {
+        count++;
+        //第一个舵机
+        if (count<quare[13])//高脉冲时长，取值范围0.5ms~2.5ms，定时器0.01ms进中断，则取值50~250
+        {   //50->-90°,100->-45°,150->0,200->45°,250->90°
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_SET);//顺负PC10
+        }
+        else if(count >= quare[13] && count <= 2000)
+        {
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_10,GPIO_PIN_RESET);
+        }
+        //第二个舵机
+        else if(count > 2000 && count < quare[14]+2000)
+        {
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_11,GPIO_PIN_SET);//里正PC11
+        }
+        else if(count >= quare[14]+2000 && count <= 4000)
+        {
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_11,GPIO_PIN_RESET);
+        }
+        //第三个舵机
+        else if(count > 4000 && count < quare[15]+4000)
+        {
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,GPIO_PIN_SET);//里负PC12
+        }
+        else if(count >= quare[15]+4000 && count <= 6000)
+        {
+            HAL_GPIO_WritePin(GPIOC,GPIO_PIN_12,GPIO_PIN_RESET);
+        }
+        //第四个舵机
+        else if(count > 6000 && count < quare[16]+6000)
+        {
+            HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);//里正PD2
+        }
+        else if(count >= quare[16]+6000 && count <= 8000)
+        {
+            HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);
+        }
+        //第五个舵机
+        else if(count > 8000 && count < quare[17]+8000)
+        {
+            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);  //顺负PB5
+        }
+        else if(count >= quare[17]+8000 && count <= 10000)
+        {
+            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
+        }
+        //第六个舵机
+        else if(count > 10000 && count < quare[18]+10000)
+        {
+            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);  //合正PB8
+        }
+        else if(count >= quare[18]+10000 && count <= 12000)
+        {
+            HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET);
+        }
+        else if(count > 12000)
+        {
+            count = 0;
+        }
+        __HAL_TIM_CLEAR_IT(&htim3,TIM_IT_UPDATE);
+    }
+
+}
+
+
+/*任务2串口中断
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)//串口中断回调
+{
+    if(huart-> Instance == USART1)
+    {
+        RxFlag = 1; //数据接收完毕的标志位
+        HAL_UART_Receive_IT(&huart1, (uint8_t*)RxBuffer,5);
+        HAL_UART_Transmit_IT(&huart1,RxBuffer,5);
+    }//串口接收，第一位是0，第二位是1、2、3速度，三四五位是角度，045表示正45度
+}
+*/
+
+
+
+
+
+
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+    /* USER CODE BEGIN Error_Handler_Debug */
+    /* User can add his own implementation to report the HAL error return state */
+    __disable_irq();
+    while (1)
+    {
+    }
+    /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+    /* USER CODE BEGIN 6 */
+    /* User can add his own implementation to report the file name and line number,
+       ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */

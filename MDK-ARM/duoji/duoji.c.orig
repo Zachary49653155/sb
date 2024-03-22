@@ -1,0 +1,15 @@
+#include "duoji.h"
+
+void control_duoji(uint8_t a)
+{
+	if(quare[4] > quare[10])
+                {
+                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(30);
+                    quare[10]=quare[4];
+                }
+                else if(quare[4] < quare[10])
+                {
+                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(30);
+                    quare[10]=quare[4];
+                }
+							}
