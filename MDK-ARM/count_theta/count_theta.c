@@ -49,5 +49,5 @@ void thetacount(void)
     printf("theta3 = %f\n",theta3);
     theta4 = atan(y0/x0)/ (2 * PI)* 360;
     printf("theta4 = %f\n",theta4);
-//		return theta1,theta2,theta3,theta4;
+
 }

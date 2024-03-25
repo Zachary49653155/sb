@@ -151,11 +151,11 @@ int main(void)
                 //¼ÆËã³ötheta
 							  thetacount();
 							
-                quare[1]=157+theta4*50/45;
+                quare[1]=159+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
                 quare[4]=155+theta3*50/45;
-                quare[6]=150+35*50/45;
+                quare[6]=150+34*50/45;
 							
 								control_duoji(4);
                 control_duoji(3);
@@ -173,7 +173,7 @@ int main(void)
             {
                 thetacount();
 							
-                quare[1]=157+theta4*50/45;
+                quare[1]=159+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
                 quare[4]=155+theta3*50/45;
