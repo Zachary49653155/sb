@@ -51,9 +51,9 @@
 
 /* USER CODE BEGIN PV */
 
-uint16_t quare[19]= {150,150,150,150,150,150,100,
-                         150,150,150,150,150,100,
-                         150,150,150,150,150,100};
+uint16_t quare[19]= {150,157,150,150,155,143,128,
+                         157,150,150,155,143,128,
+                         157,150,150,155,143,128};
 //quare1-6代表需要转到的位置
 //quare7-12表示上次所在的位置
 //quare13-18表示电机瞬时所在位置
@@ -68,6 +68,12 @@ uint8_t RecCount = 0;
 uint8_t Usart_RxFlag = 0;
 uint8_t delay_time = 0;
 
+double x0 = 0;
+double y0 = 0;
+double m = 0;
+#define PI 3.14159265
+double a1,a2,a3,angle1,angle2,angle3;
+												 
 double theta1,theta2,theta3,theta4;
 /* USER CODE END PV */
 
@@ -137,382 +143,46 @@ int main(void)
         /* USER CODE BEGIN 3 */
         HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_9);
         HAL_Delay(100);
-        /*任务2
-                //计算需要转到的位置
-                if(RxBuffer[2]=='0')//第三位表示符号，0是正
-                {
-                    jiaodu=((uint8_t)RxBuffer[3]-48)*10+((uint8_t)RxBuffer[4]-48);
-                    quare[1]=150+jiaodu*50/45;
-                }
-                else if(RxBuffer[2]=='1')//1表示负
-                {
-                    jiaodu=((uint8_t)RxBuffer[3]-48)*10+((uint8_t)RxBuffer[4]-48);
-                    quare[1]=150-jiaodu*50/45;
-                }//quare1代表需要转到的位置，quare2表示上次所在的位置
-
-
-                if(RxBuffer[0]=='0')//接受第一位是0，进入控制
-                {
-                    if(quare[1] > quare[2])
-                    {
-                        if(RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                        {
-                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(25);
-                        }
-                        if(RxBuffer[1]=='2')
-                        {
-                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(50);
-                        }
-                        if(RxBuffer[1]=='3')
-                        {
-                            for(quare[0]=quare[2]; quare[0]<quare[1]; quare[0]++)HAL_Delay(100);
-                        }
-                    }
-                    else if(quare[1] < quare[2])
-                    {
-                        if(RxBuffer[1]=='1')
-                        {
-                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(25);
-                        }
-                        if(RxBuffer[1]=='2')
-                        {
-                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(50);
-                        }
-                        if(RxBuffer[1]=='3')
-                        {
-                            for(quare[0]=quare[2]; quare[0]>quare[1]; quare[0]--)HAL_Delay(100);
-                        }
-                    }
-                }
-                quare[2]=quare[1];
-        */
-
-
-        /*任务3
-        if(Usart_RxFlag == 1 )  //数据接收完成
-        {
-            Usart_RxFlag = 0;
-            if (USART1_RxBuffer[0] == '0')   //如果第一个数据是字符0
-            {
-                //计算需要转到的位置
-        					  //第一个舵机
-                if(USART1_RxBuffer[2]=='0')//第3位表示符号，0是正
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[3]-48)*10+((uint8_t)USART1_RxBuffer[4]-48);
-                    quare[1]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[2]=='1')//1表示负
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[3]-48)*10+((uint8_t)USART1_RxBuffer[4]-48);
-                    quare[1]=150-jiaodu*50/45;
-                }
-        						//quare1-6代表需要转到的位置，quare7-12表示上次所在的位置
-        						//quare13-18表示电机瞬时所在位置
-        						//第二个舵机
-                if(USART1_RxBuffer[5]=='0')//第6位表示符号
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[6]-48)*10+((uint8_t)USART1_RxBuffer[7]-48);
-                    quare[2]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[5]=='1')
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[6]-48)*10+((uint8_t)USART1_RxBuffer[7]-48);
-                    quare[2]=150-jiaodu*50/45;
-                }
-        						//第三个舵机
-                if(USART1_RxBuffer[8]=='0')//第9位表示符号
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[9]-48)*10+((uint8_t)USART1_RxBuffer[10]-48);
-                    quare[3]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[8]=='1')
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[9]-48)*10+((uint8_t)USART1_RxBuffer[10]-48);
-                    quare[3]=150-jiaodu*50/45;
-                }
-        						//第四个舵机
-                if(USART1_RxBuffer[11]=='0')//第12位表示符号
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[12]-48)*10+((uint8_t)USART1_RxBuffer[13]-48);
-                    quare[4]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[11]=='1')
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[12]-48)*10+((uint8_t)USART1_RxBuffer[13]-48);
-                    quare[4]=150-jiaodu*50/45;
-                }
-        						//第五个舵机
-                if(USART1_RxBuffer[14]=='0')//第15位表示符号
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[15]-48)*10+((uint8_t)USART1_RxBuffer[16]-48);
-                    quare[5]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[14]=='1')
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[15]-48)*10+((uint8_t)USART1_RxBuffer[16]-48);
-                    quare[5]=150-jiaodu*50/45;
-                }
-        						//第六个舵机
-                if(USART1_RxBuffer[17]=='0')//第18位表示符号
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[18]-48)*10+((uint8_t)USART1_RxBuffer[19]-48);
-                    quare[6]=150+jiaodu*50/45;
-                }
-                else if(USART1_RxBuffer[17]=='1')
-                {
-                    jiaodu=((uint8_t)USART1_RxBuffer[18]-48)*10+((uint8_t)USART1_RxBuffer[19]-48);
-                    quare[6]=150-jiaodu*50/45;
-                }
-        				}
-
-
-
-        				//第一个舵机运动
-            if(quare[1] > quare[7])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[13]=quare[7]; quare[13]<quare[1]; quare[13]++)HAL_Delay(50);
-                }
-                quare[7]=quare[1];
-            }
-            else if(quare[1] < quare[7])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[13]=quare[7]; quare[13]>quare[1]; quare[13]--)HAL_Delay(50);
-                }
-                quare[7]=quare[1];
-            }
-
-        				//第二个舵机运动
-        				if(quare[2] > quare[8])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[14]=quare[8]; quare[14]<quare[2]; quare[14]++)HAL_Delay(50);
-                }
-                quare[8]=quare[2];
-            }
-            else if(quare[2] < quare[8])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[14]=quare[8]; quare[14]>quare[2]; quare[14]--)HAL_Delay(50);
-                }
-                quare[8]=quare[2];
-            }
-
-        	    	//第三个舵机运动
-        				if(quare[3] > quare[9])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[15]=quare[9]; quare[15]<quare[3]; quare[15]++)HAL_Delay(50);
-                }
-                quare[9]=quare[3];
-            }
-            else if(quare[3] < quare[9])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[15]=quare[9]; quare[15]>quare[3]; quare[15]--)HAL_Delay(50);
-                }
-                quare[9]=quare[3];
-            }
-        			  //第四个舵机运动
-        				if(quare[4] > quare[10])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[16]=quare[10]; quare[16]<quare[4]; quare[16]++)HAL_Delay(50);
-                }
-                quare[10]=quare[4];
-            }
-            else if(quare[4] < quare[10])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[16]=quare[10]; quare[16]>quare[4]; quare[16]--)HAL_Delay(50);
-                }
-                quare[10]=quare[4];
-            }
-        				//第五个舵机运动
-        				if(quare[5] > quare[11])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[17]=quare[11]; quare[17]<quare[5]; quare[17]++)HAL_Delay(50);
-                }
-                quare[11]=quare[5];
-            }
-            else if(quare[5] < quare[11])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[17]=quare[11]; quare[17]>quare[5]; quare[17]--)HAL_Delay(50);
-                }
-                quare[11]=quare[5];
-            }
-        		    //第六个舵机运动
-        				if(quare[6] > quare[12])
-            {
-                if(USART1_RxBuffer[1]=='1')//第二位是1或2或3，分别对应3种速度
-                {
-                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[18]=quare[12]; quare[18]<quare[6]; quare[18]++)HAL_Delay(50);
-                }
-                quare[12]=quare[6];
-            }
-            else if(quare[6] < quare[12])
-            {
-                if(USART1_RxBuffer[1]=='1')
-                {
-                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(15);
-                }
-                if(USART1_RxBuffer[1]=='2')
-                {
-                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(30);
-                }
-                if(USART1_RxBuffer[1]=='3')
-                {
-                    for(quare[18]=quare[12]; quare[18]>quare[6]; quare[18]--)HAL_Delay(50);
-                }
-                quare[12]=quare[6];
-            }
-        		}*/
         /*任务4*/
         if(Usart_RxFlag == 1 )  //数据接收完成
         {
             if (USART1_RxBuffer[0] == '7')//7是标识符，说明进入夹取控制
             {
-                //计算出x0和y0
-							  thetacount(theta1,theta2,theta3,theta4);
-
-                quare[1]=150+theta4*50/45;
+                //计算出theta
+							  thetacount();
+							
+                quare[1]=157+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
-                quare[4]=150+theta3*50/45;
-                quare[5]=150;
-                quare[6]=150+32*50/45;
+                quare[4]=155+theta3*50/45;
+                quare[6]=150+35*50/45;
+							
 								control_duoji(4);
                 control_duoji(3);
                 control_duoji(1);
                 control_duoji(2);
                 control_duoji(6);
-                HAL_Delay(1500);
-
+                HAL_Delay(1000);
                 //拿起飞镖
                 quare[2]=150+(theta1+45)*50/45;
                 control_duoji(2);
                 Usart_RxFlag = 0;//重置串口接收标志
             }
 
-
-
             if (USART1_RxBuffer[0] == '8')//8是标识符，说明进入放置控制
             {
-                thetacount(theta1,theta2,theta3,theta4);
-
-                quare[1]=150+theta4*50/45;
+                thetacount();
+							
+                quare[1]=157+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
-                quare[4]=150+theta3*50/45;
-                quare[5]=150;
+                quare[4]=155+theta3*50/45;
 								
                 control_duoji(4);
                 control_duoji(3);
                 control_duoji(1);
                 control_duoji(2);
-								
-								HAL_Delay(1500);
+								HAL_Delay(1000);
 								//放下飞镖
 								quare[6]=150-20*50/45;
                 control_duoji(6);
@@ -641,25 +311,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)//定时器中断回调函数
     }
 
 }
-
-
-/*任务2串口中断
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)//串口中断回调
-{
-    if(huart-> Instance == USART1)
-    {
-        RxFlag = 1; //数据接收完毕的标志位
-        HAL_UART_Receive_IT(&huart1, (uint8_t*)RxBuffer,5);
-        HAL_UART_Transmit_IT(&huart1,RxBuffer,5);
-    }//串口接收，第一位是0，第二位是1、2、3速度，三四五位是角度，045表示正45度
-}
-*/
-
-
-
-
-
-
 
 /* USER CODE END 4 */
 

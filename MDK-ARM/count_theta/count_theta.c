@@ -2,13 +2,13 @@
 #include "printf.h"
 #include "math.h"
 
-double x0 = 0;
-double y0 = 0;
-double m = 0;
+extern double x0;
+extern double y0;
+extern double m;
 #define PI 3.14159265
-double a1,a2,a3,angle1,angle2,angle3;
-
-void thetacount(double theta1,double theta2,double theta3,double theta4)
+extern double a1,a2,a3,angle1,angle2,angle3;
+extern double theta1,theta2,theta3,theta4;
+void thetacount(void)
 {
 	  //计算出x0和y0
     if(USART1_RxBuffer[1] == '0')
@@ -27,7 +27,7 @@ void thetacount(double theta1,double theta2,double theta3,double theta4)
     {
         y0 = -((USART1_RxBuffer[7]-48)*100+(USART1_RxBuffer[8]-48)*10+(USART1_RxBuffer[9]-48)+(USART1_RxBuffer[10]-48)*0.1);
     }
-    printf("x0 = %f\n",x0);
+    printf("\nx0 = %f\n",x0);
     printf("y0 = %f\n",y0);
     m = sqrt(x0*x0+y0*y0)-170;//求出机械臂点C与原点距离m
     printf("m = %f\n",m);
@@ -49,4 +49,5 @@ void thetacount(double theta1,double theta2,double theta3,double theta4)
     printf("theta3 = %f\n",theta3);
     theta4 = atan(y0/x0)/ (2 * PI)* 360;
     printf("theta4 = %f\n",theta4);
+//		return theta1,theta2,theta3,theta4;
 }
