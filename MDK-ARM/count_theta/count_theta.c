@@ -29,17 +29,17 @@ void thetacount(void)
     }
     printf("\nx0 = %f\n",x0);
     printf("y0 = %f\n",y0);
-    m = sqrt(x0*x0+y0*y0)-170;//求出机械臂点C与原点距离m
+    m = sqrt(x0*x0+y0*y0)-167;//求出机械臂点C与原点距离m
     printf("m = %f\n",m);
     a1=(103.5*103.5 + m*m + 16*16 - 88*88) / (2 * 103.5 * sqrt(m*m + 16*16));
     printf("a1 = %f\n",a1);
-    angle1 = acos(a1);
+    angle1 = acosf(a1);
     printf("angle1 = %f\n",angle1);
-    angle2 = atan(16 / m);
+    angle2 = atanf(16 / m);
     printf("angle2 = %f\n",angle2);
     a3=(103.5*103.5 - m*m - 16*16 + 88*88) / (2 * 103.5 * 88);
     printf("a3 = %f\n",a3);
-    angle3 = acos(a3);
+    angle3 = acosf(a3);
     printf("angle3 = %f\n",angle3);
     theta1 = -(90-(angle2+angle1)/ (2 * PI)* 360);
     printf("theta1 = %f\n",theta1);

@@ -151,7 +151,7 @@ int main(void)
                 //¼ÆËã³ötheta
 							  thetacount();
 							
-                quare[1]=159+theta4*50/45;
+                quare[1]=162+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
                 quare[4]=155+theta3*50/45;
@@ -173,7 +173,7 @@ int main(void)
             {
                 thetacount();
 							
-                quare[1]=159+theta4*50/45;
+                quare[1]=162+theta4*50/45;
                 quare[2]=150+theta1*50/45;
                 quare[3]=150+theta2*50/45;
                 quare[4]=155+theta3*50/45;
